@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoyagerStar-联系</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            min-height: 2000px;
+            position: relative;
+        }
+
+        /* 背景容器 */
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background-image 0.5s ease-in-out;
+        }
+
+        /* 顶部导航栏 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 15px 50px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 40px;
+            flex: 1;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 4px;
+        }
+
+        .navbar a:hover {
+            color: #4CAF50;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+
+        .navbar-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: yellow;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            text-decoration: orange;
+            text-align: left;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* 内容区域 */
+        .contact {
+            margin-top: 250px;
+            padding: 50px;
+            color: white;
+        }
+
+        .contact-section {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 40px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .contact-section h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .contact-section p {
+            font-size: 16px;
+            line-height: 1.8;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 按钮样式 */
+        .jump-button {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            border: 2px solid transparent;
+        }
+
+        .jump-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .jump-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</head>
+<body>
+<!-- 背景容器 -->
+<div class="background-container" id="background"></div>
+
+<!-- 顶部导航栏 -->
+<nav class="navbar">
+    <div class="navbar-title">VoyagerStar</div>
+    <ul>
+        <li><a href="index.html">首页</a></li>
+        <li><a href="contact.html">联系</a></li>
+    </ul>
+</nav>
+
+<!-- 页面内容 -->
+<div class="contact">
+    <div class="contact-section">
+        <div class="contact-weixin">
+            <h2>微信</h2>
+            <p>19907733260</p>
+        </div>
+    </div>
+
+    <div class="contact-section">
+        <div class="contact-qq">
+            <h2>QQ</h2>
+            <p>3897081534</p>
+        </div>
+    </div>
+
+    <div class="contact-section">
+        <div class="contact-bilibili">
+            <h2>Bilibili</h2>
+            <p>星旅VoyagerStar</p>
+            <div class="jump-button" onclick="window.open('https://space.bilibili.com/3546894607322044')">前往 →</div>
+        </div>
+    </div>
+
+    <div class="contact-section">
+        <div class="contact-github">
+            <h2>Github</h2>
+            <p>VoyagerStar3897081534</p>
+            <div class="jump-button" onclick="window.open('https://github.com/VoyagerStar3897081534')">前往 →</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 根据时间设置背景图片
+    function setBackgroundByTime() {
+        const hour = new Date().getHours();
+        const background = document.getElementById('background');
+
+        let backgroundImage;
+
+        if (hour >= 6 && hour < 12) {
+            // 早晨 6:00 - 11:59
+            backgroundImage = 'url("image/background/morning.png")';
+        } else if (hour >= 12 && hour < 18) {
+            // 中午 12:00 - 17:59
+            backgroundImage = 'url("image/background/noon.png")';
+        } else {
+            // 夜晚 18:00 - 5:59
+            backgroundImage = 'url("image/background/night.png")';
+        }
+
+        background.style.backgroundImage = backgroundImage;
+    }
+
+    // 页面加载时设置背景
+    setBackgroundByTime();
+
+    // 每分钟检查一次时间，更新背景（可选）
+    setInterval(setBackgroundByTime, 60000);
+
+    // 循环展示个人简介文本
+    async function loadProfileTexts() {
+        try {
+            const response = await fetch('data/profile-text.json');
+            const data = await response.json();
+            const texts = data.texts;
+            const textElement = document.getElementById('profile-text');
+            let currentIndex = 0;
+
+            // 显示当前文本（带渐隐渐显效果）
+            function showText() {
+                // 渐隐
+                textElement.style.opacity = '0';
+
+                // 等待渐隐完成后切换文本并渐显
+                setTimeout(() => {
+                    textElement.textContent = texts[currentIndex];
+                    currentIndex = (currentIndex + 1) % texts.length;
+                    // 渐显
+                    textElement.style.opacity = '1';
+                }, 500);
+            }
+
+            // 立即显示第一个文本
+            showText();
+
+            // 每3秒切换一次文本
+            setInterval(showText, 3000);
+        } catch (error) {
+            console.error('加载文本失败:', error);
+            document.getElementById('profile-text').textContent = '欢迎来到我的个人空间';
+        }
+    }
+
+    // 页面加载完成后加载文本
+    loadProfileTexts();
+</script>
+</body>
+</html>
