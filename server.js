@@ -12,9 +12,6 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// 静态文件服务 - 提供前端文件
-app.use(express.static(path.join(__dirname)));
-
 // 数据目录
 const DATA_DIR = path.join(__dirname, 'data');
 const BLOG_DIR = path.join(DATA_DIR, 'blog');
@@ -273,6 +270,10 @@ app.get('/health', (req, res) => {
 
 // ==================== 404 处理 ====================
 
+// 静态文件服务 - 提供前端文件（放在 API 路由之后）
+app.use(express.static(path.join(__dirname)));
+
+// 404 处理
 app.use((req, res) => {
     res.status(404).json({
         success: false,
