@@ -459,7 +459,10 @@ app.get('/health', (req, res) => {
 
 // 上传图片
 app.post('/api/upload/image', (req, res) => {
+    console.log('收到图片上传请求');
+    
     if (!upload) {
+        console.error('Multer 未初始化');
         return res.status(503).json({
             success: false,
             message: '文件上传功能未启用'
@@ -468,6 +471,7 @@ app.post('/api/upload/image', (req, res) => {
     
     upload.single('image')(req, res, (err) => {
         if (err) {
+            console.error('Multer 错误:', err);
             return res.status(400).json({
                 success: false,
                 message: err.message || '图片上传失败'
@@ -476,14 +480,20 @@ app.post('/api/upload/image', (req, res) => {
         
         try {
             if (!req.file) {
+                console.error('没有接收到文件');
                 return res.status(400).json({
                     success: false,
                     message: '没有上传文件'
                 });
             }
             
+            console.log('图片上传成功:', req.file.filename);
+            console.log('文件路径:', req.file.path);
+            console.log('文件大小:', req.file.size);
+            
             // 返回文件的访问URL
             const fileUrl = `/uploads/images/${req.file.filename}`;
+            console.log('访问 URL:', fileUrl);
             
             res.json({
                 success: true,
@@ -611,12 +621,6 @@ app.use(express.static(path.join(__dirname)));
 
 // 提供上传文件的访问
 app.use('/uploads', express.static(UPLOADS_DIR));
-
-// 调试：记录上传文件访问
-app.use('/uploads', (req, res, next) => {
-    console.log(`访问上传文件: ${req.path}`);
-    next();
-});
 
 // 404 处理
 app.use((req, res) => {
