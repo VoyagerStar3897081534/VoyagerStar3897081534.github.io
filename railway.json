@@ -5,7 +5,18 @@
   },
   "deploy": {
     "startCommand": "npm start",
+    "healthcheckPath": "/health",
+    "healthcheckTimeout": 100,
     "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 10
+    "volumes": [
+      {
+        "name": "blog-data",
+        "mountPath": "/app/data/blog"
+      },
+      {
+        "name": "uploads-data",
+        "mountPath": "/app/uploads"
+      }
+    ]
   }
 }

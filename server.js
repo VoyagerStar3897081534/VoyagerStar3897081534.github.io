@@ -455,6 +455,41 @@ app.get('/health', (req, res) => {
     });
 });
 
+// 调试：检查 uploads 目录
+app.get('/debug/uploads', (req, res) => {
+    try {
+        const fs = require('fs');
+        const path = require('path');
+        
+        let images = [];
+        let videos = [];
+        
+        if (fs.existsSync(IMAGES_DIR)) {
+            images = fs.readdirSync(IMAGES_DIR);
+        }
+        
+        if (fs.existsSync(VIDEOS_DIR)) {
+            videos = fs.readdirSync(VIDEOS_DIR);
+        }
+        
+        res.json({
+            success: true,
+            uploadsDir: UPLOADS_DIR,
+            imagesDir: IMAGES_DIR,
+            videosDir: VIDEOS_DIR,
+            images: images,
+            videos: videos,
+            imagesCount: images.length,
+            videosCount: videos.length
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
 // ==================== 文件上传API ====================
 
 // 上传图片
