@@ -147,19 +147,20 @@ app.post('/api/posts', (req, res) => {
         const timestamp = Date.now();
         const now = new Date();
         
+        // 使用 UTC 方法确保时间格式化一致
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        
         const post = {
             title: title.trim(),
             content: content.trim(),
             timestamp: timestamp,
             date: now.toISOString(),
-            formattedDate: now.toLocaleString('zh-CN', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            })
+            formattedDate: `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`
         };
         
         const filePath = path.join(BLOG_DIR, `${timestamp}.json`);
