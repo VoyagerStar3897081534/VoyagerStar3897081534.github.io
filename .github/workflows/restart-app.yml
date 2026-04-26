@@ -1,0 +1,78 @@
+name: Restart Application on Push
+# GitHub Actions 工作流：在推送到 main/master 分支后自动重启应用
+# 使用 PM2 进程管理器来确保应用的稳定运行和优雅重启
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  restart-app:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Install PM2 globally
+      run: npm install -g pm2
+      
+    - name: Stop existing application (if running)
+      run: |
+        # Try to stop any running Node.js processes using PM2
+        if pm2 list | grep -q "voyagerstar-blog"; then
+          echo "Stopping existing application with PM2..."
+          pm2 stop voyagerstar-blog || true
+          pm2 delete voyagerstar-blog || true
+        else
+          echo "No existing PM2 application found"
+        fi
+        
+        # Also try to kill any direct node processes as backup
+        if pgrep -f "node server.js" > /dev/null; then
+          echo "Stopping any direct Node.js processes..."
+          pkill -f "node server.js" || true
+          sleep 2
+        fi
+        
+    - name: Create logs directory
+      run: mkdir -p logs
+      
+    - name: Start application with PM2
+      run: |
+        pm2 start ecosystem.config.js
+        pm2 save
+        echo "Application started with PM2"
+        
+    - name: Wait for application to start
+      run: |
+        echo "Waiting for application to start..."
+        sleep 5
+        
+    - name: Check if application is running
+      run: |
+        if pm2 list | grep -q "online"; then
+          echo "✅ Application is running successfully"
+          pm2 status
+          curl -f http://localhost:3000 || echo "App may still be starting up"
+        else
+          echo "❌ Application failed to start"
+          pm2 logs --lines 50
+          exit 1
+        fi
+        
+    - name: Display PM2 status
+      if: always()
+      run: |
+        pm2 status
+        pm2 info voyagerstar-blog
