@@ -335,9 +335,6 @@
             <li><a href="index.html">首页</a></li>
             <li><a href="contact.html">联系</a></li>
             <li><a href="blog.html">博客</a></li>
-            <li><a href="post.html" id="nav-post" style="display: none;">发帖</a></li>
-            <li><a href="login.html" id="nav-login">登录</a></li>
-            <li><a href="#" id="nav-logout" style="display: none;" onclick="logout(); return false;">退出</a></li>
         </ul>
     </nav>
 
@@ -357,6 +354,9 @@
     <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
     <script>
         // 获取当前语言
+        import * as path from "node:path";
+        import * as fs from "node:fs";
+
         const currentLang = localStorage.getItem('language') || 'zh-CN';
         let currentPost = null;
 
@@ -455,6 +455,20 @@
             window.location.href = `post.html?edit=${currentPost.timestamp}`;
         }
 
+        const LOCAL_DIR = path.join(__dirname, 'data', 'blog');
+
+        function deleteFromLocal(timestamp) {
+            try {
+                const Path = path.join(LOCAL_DIR, `${timestamp}.json`);
+                if (fs.existsSync(Path)) {
+                    fs.unlinkSync(Path);
+                    console.log(`✅ 本地备份已删除: ${Path}`);
+                }
+            } catch (error) {
+                console.error('❌ 删除本地备份失败:', error.message);
+            }
+        }
+
         // 删除文章
         async function deletePost() {
             if (!currentPost) return;
@@ -462,6 +476,8 @@
             if (!confirm('确定要删除这篇文章吗？此操作不可恢复！')) {
                 return;
             }
+
+            deleteFromLocal(currentPost.timestamp);
             
             try {
                 const response = await fetch(`${API_BASE}/posts/${currentPost.timestamp}`, {

@@ -1,7 +1,0 @@
-{
-  "title": "Markdown 功能演示",
-  "content": "# 欢迎使用 Markdown 编辑器\n\n现在我们的博客系统支持 **Markdown** 格式了！\n\n## 主要功能\n\n### 1. 文本格式化\n- **粗体文本**\n- *斜体文本*\n- `行内代码`\n\n### 2. 列表支持\n\n无序列表：\n- 项目一\n- 项目二\n- 项目三\n\n有序列表：\n1. 第一步\n2. 第二步\n3. 第三步\n\n### 3. 引用\n\n> 这是一段引用文字\n> 可以有多行内容\n\n### 4. 代码块\n\n```javascript\nfunction hello() {\n    console.log('Hello, World!');\n}\n```\n\n### 5. 链接\n\n[访问 VoyagerStar 博客](https://github.com/VoyagerStar3897081534)\n\n### 6. 图片支持\n\n![示例图片](https://via.placeholder.com/600x300?text=Markdown+Image+Support)\n\n### 7. 视频支持\n\n<video controls width=\"100%\">\n  <source src=\"https://www.w3schools.com/html/mov_bbb.mp4\" type=\"video/mp4\">\n  您的浏览器不支持视频播放。\n</video>\n\n### 8. 表格\n\n| 功能 | 状态 | 说明 |\n|------|------|------|\n| Markdown | ✅ 已支持 | 完整的 Markdown 语法 |\n| 图片 | ✅ 已支持 | 通过 URL 插入 |\n| 视频 | ✅ 已支持 | HTML5 视频标签 |\n\n---\n\n## 如何使用\n\n1. 点击登录按钮进入管理员模式\n2. 点击发帖按钮创建新文章\n3. 使用工具栏快速插入 Markdown 标记\n4. 点击预览按钮查看效果\n5. 发布文章\n\n享受写作吧！🎉",
-  "timestamp": 1714200000000,
-  "date": "2026-04-27T01:40:00.000Z",
-  "formattedDate": "2026/04/27 09:40:00"
-}

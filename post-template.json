@@ -1,0 +1,7 @@
+{
+  "title": "文章标题",
+  "content": "文章内容（支持 Markdown 格式）\n\n## 示例\n\n这是一篇博客文章的模板。\n\n### 功能特性\n\n- 支持 Markdown 格式\n- 可以插入图片\n- 可以插入视频\n\n![图片描述](https://example.com/image.jpg)\n\n<video controls width=\"100%\">\n  <source src=\"https://example.com/video.mp4\" type=\"video/mp4\">\n</video>\n\n### 代码示例\n\n```javascript\nconsole.log('Hello World');\n```\n\n> 引用文本\n\n**粗体** 和 *斜体*",
+  "timestamp": 0,
+  "date": "2024-01-01T00:00:00.000Z",
+  "formattedDate": "2024/01/01 00:00:00"
+}

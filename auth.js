@@ -1,12 +1,14 @@
-// 认证管理模块
+// 认证管理模块 - 已禁用在线发帖功能
+// 博客文章通过本地编辑并 Git 推送的方式管理
 
 // API 基础 URL - Railway 后端
 const API_BASE = 'https://upbeat-sparkle-production-61c6.up.railway.app/api';
 
 // 前端基础 URL - 用于生成资源的完整 URL
-// 如果使用 Railway 部署前端，改为 Railway 的 URL
-// 如果使用 GitHub Pages，保持为 window.location.origin
 const FRONTEND_BASE = window.location.origin;
+
+// 注意：以下登录相关函数已不再使用
+// 博客采用 Git-based 工作流程，无需在线登录
 
 // 检查是否已登录
 function isLoggedIn() {
