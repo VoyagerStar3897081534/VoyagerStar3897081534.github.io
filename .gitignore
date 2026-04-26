@@ -27,3 +27,6 @@ app.pid
 # Environment
 .env
 .env.local
+
+# Railway
+.railway

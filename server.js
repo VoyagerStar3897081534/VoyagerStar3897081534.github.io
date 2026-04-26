@@ -268,6 +268,11 @@ app.listen(PORT, () => {
     console.log(`  VoyagerStar Blog Server`);
     console.log(`  服务器运行在: http://localhost:${PORT}`);
     console.log(`  API地址: http://localhost:${PORT}/api`);
+    if (process.env.RENDER_EXTERNAL_URL) {
+        console.log(`  云端地址: ${process.env.RENDER_EXTERNAL_URL}`);
+    } else if (process.env.RAILWAY_PUBLIC_DOMAIN) {
+        console.log(`  云端地址: https://${process.env.RAILWAY_PUBLIC_DOMAIN}`);
+    }
     console.log(`===========================================`);
 });
 

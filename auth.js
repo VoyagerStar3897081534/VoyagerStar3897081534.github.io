@@ -1,6 +1,6 @@
 // 认证管理模块
 
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = 'upbeat-sparkle-production-61c6.up.railway.app';
 
 // 检查是否已登录
 function isLoggedIn() {

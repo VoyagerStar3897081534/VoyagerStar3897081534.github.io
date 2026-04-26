@@ -76,28 +76,3 @@ jobs:
       run: |
         pm2 status
         pm2 info voyagerstar-blog
-        
-    - name: Keep application running (prevent workflow from ending)
-      run: |
-        echo "⏳ 保持工作流运行，应用将持续提供服务..."
-        echo "⚠️  注意：GitHub Actions 最长运行 6 小时后会被强制终止"
-        echo "📝 这不是生产环境部署方案，仅用于测试"
-        echo ""
-        echo "🔗 如果你想真正部署到云端，请查看 DEPLOYMENT-GUIDE.md"
-        echo ""
-        
-        # 进入无限循环以保持工作流运行
-        # 每 5 分钟检查一次应用状态并输出日志
-        while true; do
-          echo "[$(date '+%Y-%m-%d %H:%M:%S')] ✅ 应用运行中..."
-          
-          # 检查 PM2 进程状态
-          if pm2 list | grep -q "online"; then
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🟢 PM2 状态: 正常运行"
-          else
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🔴 警告: PM2 进程异常"
-          fi
-          
-          # 每 5 分钟检查一次
-          sleep 300
-        done
