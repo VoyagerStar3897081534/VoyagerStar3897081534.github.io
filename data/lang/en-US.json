@@ -41,8 +41,8 @@
   "post": {
     "titleLabel": "Title",
     "titlePlaceholder": "Enter post title",
-    "contentLabel": "Content",
-    "contentPlaceholder": "Enter post content...",
+    "contentLabel": "Content (Markdown Supported)",
+    "contentPlaceholder": "Enter post content (Markdown supported)...",
     "publishButton": "Publish",
     "cancelButton": "Cancel",
     "publishSuccess": "Published successfully!",

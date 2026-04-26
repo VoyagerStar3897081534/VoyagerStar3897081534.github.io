@@ -41,8 +41,8 @@
   "post": {
     "titleLabel": "标题",
     "titlePlaceholder": "请输入文章标题",
-    "contentLabel": "内容",
-    "contentPlaceholder": "请输入文章内容...",
+    "contentLabel": "内容（支持 Markdown）",
+    "contentPlaceholder": "请输入文章内容（支持 Markdown 格式）...",
     "publishButton": "发布",
     "cancelButton": "取消",
     "publishSuccess": "发布成功！",

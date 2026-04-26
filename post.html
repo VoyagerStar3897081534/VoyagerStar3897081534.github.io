@@ -212,6 +212,117 @@
             line-height: 1.6;
         }
 
+        /* Markdown 工具栏 */
+        .markdown-toolbar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .toolbar-btn {
+            padding: 8px 12px;
+            background-color: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .toolbar-btn:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+            border-color: #4CAF50;
+        }
+
+        .toolbar-separator {
+            width: 1px;
+            background-color: rgba(255, 255, 255, 0.3);
+            margin: 0 5px;
+        }
+
+        /* 预览区域 */
+        .preview-container {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .preview-container.show {
+            display: block;
+        }
+
+        .preview-header {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .preview-content {
+            color: #444;
+            line-height: 1.8;
+        }
+
+        .preview-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .preview-content video {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .preview-content pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .preview-content code {
+            background-color: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .preview-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 15px;
+            margin: 10px 0;
+            color: #666;
+        }
+
+        .preview-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .preview-content th,
+        .preview-content td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .preview-content th {
+            background-color: #667eea;
+            color: white;
+        }
+
         .form-group textarea:focus {
             outline: none;
             border-color: #4CAF50;
@@ -324,12 +435,37 @@
                 </div>
                 <div class="form-group">
                     <label for="content" data-i18n="post.contentLabel">内容</label>
+                    <!-- Markdown 工具栏 -->
+                    <div class="markdown-toolbar">
+                        <button type="button" class="toolbar-btn" onclick="insertMarkdown('**', '**')" title="粗体"><b>B</b></button>
+                        <button type="button" class="toolbar-btn" onclick="insertMarkdown('*', '*')" title="斜体"><i>I</i></button>
+                        <button type="button" class="toolbar-btn" onclick="insertMarkdown('# ', '')" title="标题">H1</button>
+                        <button type="button" class="toolbar-btn" onclick="insertMarkdown('## ', '')" title="副标题">H2</button>
+                        <div class="toolbar-separator"></div>
+                        <button type="button" class="toolbar-btn" onclick="insertMarkdown('- ', '')" title="列表">• 列表</button>
+                        <button type="button" class="toolbar-btn" onclick="insertMarkdown('1. ', '')" title="有序列表">1. 列表</button>
+                        <button type="button" class="toolbar-btn" onclick="insertMarkdown('> ', '')" title="引用">❝ 引用</button>
+                        <div class="toolbar-separator"></div>
+                        <button type="button" class="toolbar-btn" onclick="insertMarkdown('`', '`')" title="代码">`代码`</button>
+                        <button type="button" class="toolbar-btn" onclick="insertMarkdown('```\\n', '\\n```')" title="代码块">代码块</button>
+                        <button type="button" class="toolbar-btn" onclick="insertLink()" title="链接">🔗 链接</button>
+                        <div class="toolbar-separator"></div>
+                        <button type="button" class="toolbar-btn" onclick="insertImage()" title="图片">🖼️ 图片</button>
+                        <button type="button" class="toolbar-btn" onclick="insertVideo()" title="视频">🎥 视频</button>
+                        <div class="toolbar-separator"></div>
+                        <button type="button" class="toolbar-btn" onclick="togglePreview()" id="previewBtn" title="预览">👁️ 预览</button>
+                    </div>
                     <textarea 
                         id="content" 
                         data-i18n-placeholder="post.contentPlaceholder"
-                        placeholder="请输入文章内容..." 
+                        placeholder="请输入文章内容（支持 Markdown 格式）..." 
                         required
                     ></textarea>
+                    <!-- Markdown 预览区域 -->
+                    <div class="preview-container" id="previewContainer">
+                        <div class="preview-header">预览</div>
+                        <div class="preview-content" id="previewContent"></div>
+                    </div>
                 </div>
                 <div class="button-group">
                     <button type="submit" class="publish-button" data-i18n="post.publishButton">发布</button>
@@ -342,6 +478,8 @@
 
     <script src="background.js"></script>
     <script src="auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
     <script>
         // 检查登录状态
         if (!requireLogin()) {
@@ -520,6 +658,92 @@
 
         // 页面加载完成后加载语言
         loadLanguage(currentLang);
+
+        // ==================== Markdown 功能 ====================
+
+        // 插入 Markdown 标记
+        function insertMarkdown(before, after) {
+            const textarea = document.getElementById('content');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const selectedText = text.substring(start, end);
+            
+            const newText = text.substring(0, start) + before + selectedText + after + text.substring(end);
+            textarea.value = newText;
+            
+            // 恢复光标位置
+            textarea.focus();
+            textarea.setSelectionRange(start + before.length, end + before.length);
+        }
+
+        // 插入链接
+        function insertLink() {
+            const url = prompt('请输入链接地址:');
+            if (url) {
+                const text = prompt('请输入链接文本:', '点击这里');
+                if (text) {
+                    insertMarkdown(`[${text}](${url})`, '');
+                }
+            }
+        }
+
+        // 插入图片
+        function insertImage() {
+            const url = prompt('请输入图片URL地址:');
+            if (url) {
+                const alt = prompt('请输入图片描述:', '图片');
+                if (alt !== null) {
+                    insertMarkdown(`![${alt}](${url})`, '');
+                }
+            }
+        }
+
+        // 插入视频
+        function insertVideo() {
+            const url = prompt('请输入视频URL地址（支持 MP4、WebM 等格式）:');
+            if (url) {
+                const videoHtml = `\n<video controls width="100%">\n  <source src="${url}" type="video/mp4">\n  您的浏览器不支持视频播放。\n</video>\n`;
+                const textarea = document.getElementById('content');
+                const start = textarea.selectionStart;
+                const text = textarea.value;
+                
+                textarea.value = text.substring(0, start) + videoHtml + text.substring(start);
+                textarea.focus();
+            }
+        }
+
+        // 切换预览
+        let isPreviewMode = false;
+        function togglePreview() {
+            const previewContainer = document.getElementById('previewContainer');
+            const previewContent = document.getElementById('previewContent');
+            const content = document.getElementById('content').value;
+            
+            if (!isPreviewMode) {
+                // 显示预览
+                const html = DOMPurify.sanitize(marked.parse(content));
+                previewContent.innerHTML = html;
+                previewContainer.classList.add('show');
+                document.getElementById('previewBtn').textContent = '✏️ 编辑';
+                isPreviewMode = true;
+            } else {
+                // 隐藏预览
+                previewContainer.classList.remove('show');
+                document.getElementById('previewBtn').textContent = '👁️ 预览';
+                isPreviewMode = false;
+            }
+        }
+
+        // 实时预览（可选，在输入时更新预览）
+        document.getElementById('content').addEventListener('input', function() {
+            if (isPreviewMode) {
+                const previewContent = document.getElementById('previewContent');
+                const content = this.value;
+                const html = DOMPurify.sanitize(marked.parse(content));
+                previewContent.innerHTML = html;
+            }
+        });
     </script>
 </body>
 </html>

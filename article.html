@@ -129,8 +129,113 @@
             color: #444;
             font-size: 18px;
             line-height: 2;
-            white-space: pre-wrap;
             word-wrap: break-word;
+        }
+
+        /* Markdown 样式 */
+        .article-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 15px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .article-content video {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 15px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .article-content pre {
+            background-color: #f4f4f4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .article-content code {
+            background-color: #f4f4f4;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .article-content pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+
+        .article-content blockquote {
+            border-left: 4px solid #667eea;
+            padding: 15px 20px;
+            margin: 15px 0;
+            background-color: rgba(102, 126, 234, 0.05);
+            border-radius: 4px;
+            color: #555;
+        }
+
+        .article-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 15px 0;
+        }
+
+        .article-content th,
+        .article-content td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .article-content th {
+            background-color: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+
+        .article-content tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .article-content ul,
+        .article-content ol {
+            padding-left: 30px;
+            margin: 15px 0;
+        }
+
+        .article-content li {
+            margin: 8px 0;
+        }
+
+        .article-content h1,
+        .article-content h2,
+        .article-content h3,
+        .article-content h4,
+        .article-content h5,
+        .article-content h6 {
+            margin: 25px 0 15px 0;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .article-content h1 { font-size: 2em; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .article-content h2 { font-size: 1.7em; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        .article-content h3 { font-size: 1.4em; }
+        .article-content h4 { font-size: 1.2em; }
+        .article-content a {
+            color: #667eea;
+            text-decoration: none;
+            border-bottom: 1px dotted #667eea;
+        }
+
+        .article-content a:hover {
+            color: #764ba2;
+            border-bottom-style: solid;
         }
 
         .article-actions {
@@ -248,6 +353,8 @@
 
     <script src="background.js"></script>
     <script src="auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
     <script>
         // 获取当前语言
         const currentLang = localStorage.getItem('language') || 'zh-CN';
@@ -305,6 +412,9 @@
             // 更新页面标题为 "VoyagerStar-文章标题"
             document.title = `VoyagerStar-${post.title}`;
             
+            // 使用 marked 解析 Markdown，并用 DOMPurify 清理 HTML
+            const renderedContent = DOMPurify.sanitize(marked.parse(post.content));
+            
             container.innerHTML = `
                 <div class="article-card">
                     <div class="article-header">
@@ -316,7 +426,7 @@
                         </div>
                     </div>
                     
-                    <div class="article-content">${escapeHtml(post.content)}</div>
+                    <div class="article-content" id="article-body">${renderedContent}</div>
                     
                     <div class="article-actions">
                         <a href="blog.html" class="back-button">← 返回列表</a>
