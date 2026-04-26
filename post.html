@@ -792,8 +792,8 @@
                             const result = JSON.parse(xhr.responseText);
                             
                             if (result.success) {
-                                // 使用完整的 URL（包含协议和域名）
-                                const imageUrl = window.location.origin + result.data.url;
+                                // 使用 Railway 的完整 URL（不是 window.location.origin）
+                                const imageUrl = 'https://upbeat-sparkle-production-61c6.up.railway.app' + result.data.url;
                                 const alt = prompt('请输入图片描述:', file.name);
                                 if (alt !== null) {
                                     insertMarkdown(`![${alt}](${imageUrl})`, '');
@@ -878,8 +878,8 @@
                             const result = JSON.parse(xhr.responseText);
                             
                             if (result.success) {
-                                // 使用完整的 URL（包含协议和域名）
-                                const videoUrl = window.location.origin + result.data.url;
+                                // 使用 Railway 的完整 URL（不是 window.location.origin）
+                                const videoUrl = 'https://upbeat-sparkle-production-61c6.up.railway.app' + result.data.url;
                                 const videoHtml = `\n<video controls width="100%">\n  <source src="${videoUrl}" type="${result.data.mimetype}">\n  您的浏览器不支持视频播放。\n</video>\n`;
                                 const textarea = document.getElementById('content');
                                 const start = textarea.selectionStart;
