@@ -12,9 +12,11 @@
     "navbarTitle": "VoyagerStar",
     "welcomeTitle": "欢迎来到VoyagerStar的博客",
     "scrollText": "向下滚动查看更多内容...",
-    "loginTitle": "管理员登录",
-    "postTitle": "发布新文章",
-    "blogListTitle": "博客文章"
+    "loginTitle": "VoyagerStar-管理员登录",
+    "postTitle": "VoyagerStar-发布新文章",
+    "blogListTitle": "VoyagerStar-博客文章",
+	  "contactTitle": "VoyagerStar-联系方式",
+    "articleTitle": "VoyagerStar-文章详情"
   },
   "profile": {
     "loading": "加载中...",
@@ -24,7 +26,7 @@
     "pageTitle": "VoyagerStar-联系",
     "wechat": "微信",
     "qq": "QQ",
-    "bilibili": "Bilibili",
+    "bilibili": "哔哩哔哩",
     "github": "Github",
     "goTo": "前往 →"
   },

@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="titles.postTitle">发布新文章</title>
+    <link rel="icon" type="image/png" href="image/head.png">
+    <title data-i18n="titles.postTitle">VoyagerStar-发布新文章</title>
     <style>
         * {
             margin: 0;
@@ -404,9 +405,19 @@
                 }
             });
 
-            // 更新页面标题
-            if (langData.titles && langData.titles.siteTitle) {
-                document.title = langData.titles.siteTitle;
+            // 更新页面标题 - 根据当前页面设置相应标题
+            if (langData.titles) {
+                const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+                let titleKey = 'siteTitle'; // 默认标题
+                
+                // 根据当前页面选择对应的标题键
+                if (currentPage === 'post.html') {
+                    titleKey = 'postTitle';
+                }
+                
+                if (langData.titles[titleKey]) {
+                    document.title = langData.titles[titleKey];
+                }
             }
         }
 

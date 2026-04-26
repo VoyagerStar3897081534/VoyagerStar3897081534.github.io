@@ -12,9 +12,11 @@
     "navbarTitle": "VoyagerStar",
     "welcomeTitle": "Welcome to VoyagerStar's Blog",
     "scrollText": "Scroll down to see more content...",
-    "loginTitle": "Admin Login",
-    "postTitle": "New Post",
-    "blogListTitle": "Blog Posts"
+    "loginTitle": "VoyagerStar-Admin Login",
+    "postTitle": "VoyagerStar-New Post",
+    "blogListTitle": "VoyagerStar-Blog Posts",
+	  "contactTitle": "VoyagerStar-Contact",
+    "articleTitle": "VoyagerStar-Article Details"
   },
   "profile": {
     "loading": "Loading...",

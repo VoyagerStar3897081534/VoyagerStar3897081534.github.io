@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文章详情</title>
+    <link rel="icon" type="image/png" href="image/head.png">
+    <title>VoyagerStar-文章详情</title>
     <style>
         * {
             margin: 0;
@@ -248,6 +249,8 @@
     <script src="background.js"></script>
     <script src="auth.js"></script>
     <script>
+        // 获取当前语言
+        const currentLang = localStorage.getItem('language') || 'zh-CN';
         let currentPost = null;
 
         // 从URL获取时间戳参数
@@ -273,7 +276,7 @@
             }
 
             try {
-                const response = await fetch(`${API_BASE}/posts/${timestamp}`);
+                const response = await fetch(`${API_BASE}/posts/${timestamp}?lang=${currentLang}`);
                 const result = await response.json();
                 
                 if (!result.success) {
@@ -298,6 +301,9 @@
         function renderArticle(post) {
             const container = document.getElementById('article-content');
             const isAdmin = isLoggedIn();
+            
+            // 更新页面标题为 "VoyagerStar-文章标题"
+            document.title = `VoyagerStar-${post.title}`;
             
             container.innerHTML = `
                 <div class="article-card">

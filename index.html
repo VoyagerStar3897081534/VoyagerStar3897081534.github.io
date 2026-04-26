@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoyagerStar-主页</title>
+    <link rel="icon" type="image/png" href="image/head.png">
+    <title data-i18n="titles.siteTitle">VoyagerStar-主页</title>
     <style>
         * {
             margin: 0;
@@ -106,7 +107,7 @@
             z-index: 1001;
         }
 
-        .lang-dropdown.show {
+           .lang-dropdown.show {
             display: block;
         }
 
@@ -206,6 +207,87 @@
             line-height: 1.8;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
         }
+
+        /* 最近博客区域 */
+        .recent-posts-section {
+            margin-top: 40px;
+        }
+
+        .recent-posts-section h2 {
+            color: white;
+            font-size: 32px;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .recent-post-card {
+            background-color: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .recent-post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .recent-post-title {
+            color: white;
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .recent-post-date {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .recent-post-content {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .read-more-button {
+            display: inline-block;
+            padding: 10px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            border: none;
+        }
+
+        .read-more-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .no-posts-message {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 18px;
+            padding: 40px 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -246,6 +328,14 @@
         <div class="content-section">
             <h2 data-i18n="titles.welcomeTitle">欢迎来到VoyagerStar的博客</h2>
             <p data-i18n="titles.scrollText">向下滚动查看更多内容...</p>
+        </div>
+    
+        <!-- 最近博客文章 -->
+        <div class="recent-posts-section">
+            <h2>📝 最近文章</h2>
+            <div id="recent-posts-container">
+                <div class="no-posts-message">加载中...</div>
+            </div>
         </div>
     </div>
 
@@ -289,9 +379,19 @@
                 }
             });
 
-            // 更新页面标题
-            if (langData.titles && langData.titles.siteTitle) {
-                document.title = langData.titles.siteTitle;
+            // 更新页面标题 - 根据当前页面设置相应标题
+            if (langData.titles) {
+                const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+                let titleKey = 'siteTitle'; // 默认标题
+                
+                // 根据当前页面选择对应的标题键
+                if (currentPage === 'index.html') {
+                    titleKey = 'siteTitle';
+                }
+                
+                if (langData.titles[titleKey]) {
+                    document.title = langData.titles[titleKey];
+                }
             }
         }
 
@@ -384,9 +484,65 @@
             }, 500);
         }
 
+        // 加载最近三篇博客
+        async function loadRecentPosts() {
+            const container = document.getElementById('recent-posts-container');
+            
+            try {
+                const apiUrl = `${API_BASE}/posts?lang=${currentLang}`;
+                const response = await fetch(apiUrl);
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.message || '加载失败');
+                }
+                
+                const posts = result.data;
+                
+                if (posts.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-posts-message">
+                            <p>暂无文章</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // 取最近三篇
+                const recentPosts = posts.slice(0, 3);
+                
+                // 渲染文章列表
+                container.innerHTML = recentPosts.map(post => `
+                    <div class="recent-post-card">
+                        <h3 class="recent-post-title">${escapeHtml(post.title)}</h3>
+                        <div class="recent-post-date">发布于 ${post.formattedDate}</div>
+                        <div class="recent-post-content">${escapeHtml(post.content.substring(0, 200))}${post.content.length > 200 ? '...' : ''}</div>
+                        <button class="read-more-button" onclick="window.location.href='article.html?timestamp=${post.timestamp}'">
+                            阅读全文
+                        </button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('加载最近文章失败:', error);
+                container.innerHTML = `
+                    <div class="no-posts-message">
+                        <p style="color: #ff6b6b;">❌ 加载失败：${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 转义HTML特殊字符
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         // 页面加载完成后加载语言和文本
         loadLanguage(currentLang);
         loadProfileTexts();
+        loadRecentPosts();
     </script>
 </body>
 </html>

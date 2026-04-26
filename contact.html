@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoyagerStar-联系</title>
+    <link rel="icon" type="image/png" href="image/head.png">
+    <title data-i18n="titles.contactListTitle">VoyagerStar-联系方式</title>
     <style>
         * {
             margin: 0;
@@ -223,13 +224,15 @@
 <div class="contact">
     <div class="contact-section">
         <div class="contact-weixin">
+            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/wechat.svg" alt="WeChat" style="width: 40px; height: 40px; margin-top: 10px; filter: brightness(0) invert(1);">
             <h2 data-i18n="contact.wechat">微信</h2>
-            <p>19907733260</p>
+            <p>voyagerstar</p>
         </div>
     </div>
 
     <div class="contact-section">
         <div class="contact-qq">
+            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/tencentqq.svg" alt="QQ" style="width: 40px; height: 40px; margin-top: 10px; filter: brightness(0) invert(1);">
             <h2 data-i18n="contact.qq">QQ</h2>
             <p>3897081534</p>
         </div>
@@ -237,6 +240,7 @@
 
     <div class="contact-section">
         <div class="contact-bilibili">
+            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/bilibili.svg" alt="Bilibili" style="width: 40px; height: 40px; margin-top: 10px; filter: brightness(0) invert(1);">
             <h2 data-i18n="contact.bilibili">Bilibili</h2>
             <p>星旅VoyagerStar</p>
             <div class="jump-button" onclick="window.open('https://space.bilibili.com/3546894607322044')" data-i18n="contact.goTo">前往 →</div>
@@ -245,6 +249,7 @@
 
     <div class="contact-section">
         <div class="contact-github">
+            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/github.svg" alt="GitHub" style="width: 40px; height: 40px; margin-top: 10px; filter: brightness(0) invert(1);">
             <h2 data-i18n="contact.github">Github</h2>
             <p>VoyagerStar3897081534</p>
             <div class="jump-button" onclick="window.open('https://github.com/VoyagerStar3897081534')" data-i18n="contact.goTo">前往 →</div>
@@ -292,9 +297,19 @@
             }
         });
 
-        // 更新页面标题
-        if (langData.titles && langData.titles.siteTitle) {
-            document.title = langData.titles.siteTitle;
+        // 更新页面标题 - 根据当前页面设置相应标题
+        if (langData.titles) {
+            const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+            let titleKey = 'siteTitle'; // 默认标题
+            
+            // 根据当前页面选择对应的标题键
+            if (currentPage === 'contact.html') {
+                titleKey = 'contactTitle';
+            }
+            
+            if (langData.titles[titleKey]) {
+                document.title = langData.titles[titleKey];
+            }
         }
     }
 

@@ -66,11 +66,42 @@ function generateToken() {
     return Buffer.from(Date.now().toString()).toString('base64');
 }
 
+// 根据语言格式化时间
+function formatDateTimeByLang(date, lang = 'zh-CN') {
+    const timestamp = date.getTime();
+    
+    if (lang === 'en-US') {
+        // 英文显示 UTC 时间
+        const year = date.getUTCFullYear();
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        const hours = String(date.getUTCHours()).padStart(2, '0');
+        const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+        const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+        return `${year}/${month}/${day} ${hours}:${minutes}:${seconds} (UTC)`;
+    } else {
+        // 中文显示北京时间 (UTC+8)
+        const utcTime = timestamp + (date.getTimezoneOffset() * 60000);
+        const beijingTime = new Date(utcTime + (8 * 3600000));
+        
+        const year = beijingTime.getFullYear();
+        const month = String(beijingTime.getMonth() + 1).padStart(2, '0');
+        const day = String(beijingTime.getDate()).padStart(2, '0');
+        const hours = String(beijingTime.getHours()).padStart(2, '0');
+        const minutes = String(beijingTime.getMinutes()).padStart(2, '0');
+        const seconds = String(beijingTime.getSeconds()).padStart(2, '0');
+        return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
+    }
+}
+
 // ==================== 博客文章API ====================
 
 // 获取所有博客文章列表
 app.get('/api/posts', (req, res) => {
     try {
+        // 从查询参数或请求头中获取语言
+        const lang = req.query.lang || req.headers['accept-language'] || 'zh-CN';
+        
         const files = fs.readdirSync(BLOG_DIR);
         const posts = [];
         
@@ -80,6 +111,11 @@ app.get('/api/posts', (req, res) => {
                     const filePath = path.join(BLOG_DIR, file);
                     const content = fs.readFileSync(filePath, 'utf8');
                     const post = JSON.parse(content);
+                    
+                    // 根据语言重新格式化时间
+                    const postDate = new Date(post.date);
+                    post.formattedDate = formatDateTimeByLang(postDate, lang);
+                    
                     posts.push(post);
                 } catch (err) {
                     console.error(`读取文件 ${file} 失败:`, err);
@@ -106,6 +142,9 @@ app.get('/api/posts', (req, res) => {
 // 获取单篇博客文章
 app.get('/api/posts/:timestamp', (req, res) => {
     try {
+        // 从查询参数或请求头中获取语言
+        const lang = req.query.lang || req.headers['accept-language'] || 'zh-CN';
+        
         const timestamp = req.params.timestamp;
         const filePath = path.join(BLOG_DIR, `${timestamp}.json`);
         
@@ -118,6 +157,10 @@ app.get('/api/posts/:timestamp', (req, res) => {
         
         const content = fs.readFileSync(filePath, 'utf8');
         const post = JSON.parse(content);
+        
+        // 根据语言重新格式化时间
+        const postDate = new Date(post.date);
+        post.formattedDate = formatDateTimeByLang(postDate, lang);
         
         res.json({
             success: true,
@@ -147,13 +190,17 @@ app.post('/api/posts', (req, res) => {
         const timestamp = Date.now();
         const now = new Date();
         
-        // 使用 UTC 方法确保时间格式化一致
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
+        // 使用 UTC+8 (北京时间) 格式化时间
+        // 获取 UTC 时间并转换为北京时间 (UTC+8)
+        const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000); // 转换为 UTC
+        const beijingTime = new Date(utcTime + (8 * 3600000)); // 转换为北京时间
+        
+        const year = beijingTime.getFullYear();
+        const month = String(beijingTime.getMonth() + 1).padStart(2, '0');
+        const day = String(beijingTime.getDate()).padStart(2, '0');
+        const hours = String(beijingTime.getHours()).padStart(2, '0');
+        const minutes = String(beijingTime.getMinutes()).padStart(2, '0');
+        const seconds = String(beijingTime.getSeconds()).padStart(2, '0');
         
         const post = {
             title: title.trim(),
