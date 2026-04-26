@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "home": "Home",
+    "contact": "Contact",
+    "blog": "Blog",
+    "post": "Post",
+    "login": "Login",
+    "logout": "Logout"
+  },
+  "titles": {
+    "siteTitle": "VoyagerStar-Home",
+    "navbarTitle": "VoyagerStar",
+    "welcomeTitle": "Welcome to VoyagerStar's Blog",
+    "scrollText": "Scroll down to see more content...",
+    "loginTitle": "Admin Login",
+    "postTitle": "New Post",
+    "blogListTitle": "Blog Posts"
+  },
+  "profile": {
+    "loading": "Loading...",
+    "defaultText": "Welcome to my personal space"
+  },
+  "contact": {
+    "pageTitle": "VoyagerStar-Contact",
+    "wechat": "WeChat",
+    "qq": "QQ",
+    "bilibili": "Bilibili",
+    "github": "Github",
+    "goTo": "Go to →"
+  },
+  "login": {
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter admin password",
+    "loginButton": "Login",
+    "loginSuccess": "Login successful!",
+    "loginFailed": "Incorrect password, please try again",
+    "alreadyLoggedIn": "Already logged in"
+  },
+  "post": {
+    "titleLabel": "Title",
+    "titlePlaceholder": "Enter post title",
+    "contentLabel": "Content",
+    "contentPlaceholder": "Enter post content...",
+    "publishButton": "Publish",
+    "cancelButton": "Cancel",
+    "publishSuccess": "Published successfully!",
+    "publishFailed": "Publish failed, please try again",
+    "titleRequired": "Title is required",
+    "contentRequired": "Content is required",
+    "notLoggedIn": "Please login first"
+  },
+  "blog": {
+    "noPosts": "No posts yet",
+    "readMore": "Read more",
+    "publishedAt": "Published at",
+    "backToList": "Back to list"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "home": "首页",
+    "contact": "联系",
+    "blog": "博客",
+    "post": "发帖",
+    "login": "登录",
+    "logout": "退出"
+  },
+  "titles": {
+    "siteTitle": "VoyagerStar-主页",
+    "navbarTitle": "VoyagerStar",
+    "welcomeTitle": "欢迎来到VoyagerStar的博客",
+    "scrollText": "向下滚动查看更多内容...",
+    "loginTitle": "管理员登录",
+    "postTitle": "发布新文章",
+    "blogListTitle": "博客文章"
+  },
+  "profile": {
+    "loading": "加载中...",
+    "defaultText": "欢迎来到我的个人空间"
+  },
+  "contact": {
+    "pageTitle": "VoyagerStar-联系",
+    "wechat": "微信",
+    "qq": "QQ",
+    "bilibili": "Bilibili",
+    "github": "Github",
+    "goTo": "前往 →"
+  },
+  "login": {
+    "passwordLabel": "密码",
+    "passwordPlaceholder": "请输入管理员密码",
+    "loginButton": "登录",
+    "loginSuccess": "登录成功！",
+    "loginFailed": "密码错误，请重试",
+    "alreadyLoggedIn": "已登录"
+  },
+  "post": {
+    "titleLabel": "标题",
+    "titlePlaceholder": "请输入文章标题",
+    "contentLabel": "内容",
+    "contentPlaceholder": "请输入文章内容...",
+    "publishButton": "发布",
+    "cancelButton": "取消",
+    "publishSuccess": "发布成功！",
+    "publishFailed": "发布失败，请重试",
+    "titleRequired": "标题不能为空",
+    "contentRequired": "内容不能为空",
+    "notLoggedIn": "请先登录"
+  },
+  "blog": {
+    "noPosts": "暂无文章",
+    "readMore": "阅读全文",
+    "publishedAt": "发布于",
+    "backToList": "返回列表"
+  }
+}
