@@ -1,6 +1,6 @@
 // 认证管理模块
 
-const API_BASE = 'upbeat-sparkle-production-61c6.up.railway.app';
+const API_BASE = 'https://upbeat-sparkle-production-61c6.up.railway.app/api';
 
 // 检查是否已登录
 function isLoggedIn() {
