@@ -392,6 +392,44 @@
             border: 1px solid #f44336;
             display: block;
         }
+
+        /* 上传进度条 */
+        .upload-progress {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .upload-progress.show {
+            display: block;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .progress-text {
+            color: white;
+            font-size: 14px;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -474,6 +512,13 @@
                     <button type="button" class="cancel-button" data-i18n="post.cancelButton" onclick="window.location.href='blog.html'">取消</button>
                 </div>
                 <div id="message" class="message"></div>
+                <!-- 上传进度条 -->
+                <div id="uploadProgress" class="upload-progress">
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">上传中... 0%</div>
+                </div>
             </form>
         </div>
     </div>
@@ -649,7 +694,15 @@
                         window.location.href = 'blog.html';
                     }, 2000);
                 } else {
-                    throw new Error(result.message);
+                    // 显示错误消息
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = result.message || '发布失败，请重试';
+                    
+                    // 如果是标题重复错误，聚焦到标题输入框
+                    if (response.status === 409) {
+                        document.getElementById('title').focus();
+                        document.getElementById('title').select();
+                    }
                 }
             } catch (error) {
                 console.error('发布失败:', error);
@@ -706,7 +759,7 @@
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'image/*';
-            input.onchange = async function(e) {
+            input.onchange = function(e) {
                 const file = e.target.files[0];
                 if (!file) return;
                 
@@ -719,28 +772,56 @@
                 const formData = new FormData();
                 formData.append('image', file);
                 
-                try {
-                    const response = await fetch(`${API_BASE}/upload/image`, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if (result.success) {
-                        const imageUrl = window.location.origin + result.data.url;
-                        const alt = prompt('请输入图片描述:', file.name);
-                        if (alt !== null) {
-                            insertMarkdown(`![${alt}](${imageUrl})`, '');
-                        }
-                        showMessage('图片上传成功！', 'success');
-                    } else {
-                        throw new Error(result.message);
+                // 显示进度条
+                showProgress(0);
+                
+                const xhr = new XMLHttpRequest();
+                
+                // 监听上传进度
+                xhr.upload.addEventListener('progress', function(e) {
+                    if (e.lengthComputable) {
+                        const percentComplete = Math.round((e.loaded / e.total) * 100);
+                        updateProgress(percentComplete);
                     }
-                } catch (error) {
-                    console.error('上传失败:', error);
-                    showMessage('图片上传失败: ' + error.message, 'error');
-                }
+                });
+                
+                // 监听完成
+                xhr.addEventListener('load', function() {
+                    if (xhr.status === 200) {
+                        try {
+                            const result = JSON.parse(xhr.responseText);
+                            
+                            if (result.success) {
+                                // 使用完整的 URL（包含协议和域名）
+                                const imageUrl = window.location.origin + result.data.url;
+                                const alt = prompt('请输入图片描述:', file.name);
+                                if (alt !== null) {
+                                    insertMarkdown(`![${alt}](${imageUrl})`, '');
+                                }
+                                hideProgress();
+                                showMessage('图片上传成功！', 'success');
+                            } else {
+                                throw new Error(result.message);
+                            }
+                        } catch (error) {
+                            hideProgress();
+                            showMessage('图片上传失败: ' + error.message, 'error');
+                        }
+                    } else {
+                        hideProgress();
+                        showMessage('图片上传失败: HTTP ' + xhr.status, 'error');
+                    }
+                });
+                
+                // 监听错误
+                xhr.addEventListener('error', function() {
+                    hideProgress();
+                    showMessage('图片上传失败: 网络错误', 'error');
+                });
+                
+                // 发送请求
+                xhr.open('POST', `${API_BASE}/upload/image`);
+                xhr.send(formData);
             };
             input.click();
         }
@@ -764,7 +845,7 @@
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'video/*';
-            input.onchange = async function(e) {
+            input.onchange = function(e) {
                 const file = e.target.files[0];
                 if (!file) return;
                 
@@ -777,31 +858,59 @@
                 const formData = new FormData();
                 formData.append('video', file);
                 
-                try {
-                    const response = await fetch(`${API_BASE}/upload/video`, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if (result.success) {
-                        const videoUrl = window.location.origin + result.data.url;
-                        const videoHtml = `\n<video controls width="100%">\n  <source src="${videoUrl}" type="${result.data.mimetype}">\n  您的浏览器不支持视频播放。\n</video>\n`;
-                        const textarea = document.getElementById('content');
-                        const start = textarea.selectionStart;
-                        const text = textarea.value;
-                        
-                        textarea.value = text.substring(0, start) + videoHtml + text.substring(start);
-                        textarea.focus();
-                        showMessage('视频上传成功！', 'success');
-                    } else {
-                        throw new Error(result.message);
+                // 显示进度条
+                showProgress(0);
+                
+                const xhr = new XMLHttpRequest();
+                
+                // 监听上传进度
+                xhr.upload.addEventListener('progress', function(e) {
+                    if (e.lengthComputable) {
+                        const percentComplete = Math.round((e.loaded / e.total) * 100);
+                        updateProgress(percentComplete);
                     }
-                } catch (error) {
-                    console.error('上传失败:', error);
-                    showMessage('视频上传失败: ' + error.message, 'error');
-                }
+                });
+                
+                // 监听完成
+                xhr.addEventListener('load', function() {
+                    if (xhr.status === 200) {
+                        try {
+                            const result = JSON.parse(xhr.responseText);
+                            
+                            if (result.success) {
+                                // 使用完整的 URL（包含协议和域名）
+                                const videoUrl = window.location.origin + result.data.url;
+                                const videoHtml = `\n<video controls width="100%">\n  <source src="${videoUrl}" type="${result.data.mimetype}">\n  您的浏览器不支持视频播放。\n</video>\n`;
+                                const textarea = document.getElementById('content');
+                                const start = textarea.selectionStart;
+                                const text = textarea.value;
+                                
+                                textarea.value = text.substring(0, start) + videoHtml + text.substring(start);
+                                textarea.focus();
+                                hideProgress();
+                                showMessage('视频上传成功！', 'success');
+                            } else {
+                                throw new Error(result.message);
+                            }
+                        } catch (error) {
+                            hideProgress();
+                            showMessage('视频上传失败: ' + error.message, 'error');
+                        }
+                    } else {
+                        hideProgress();
+                        showMessage('视频上传失败: HTTP ' + xhr.status, 'error');
+                    }
+                });
+                
+                // 监听错误
+                xhr.addEventListener('error', function() {
+                    hideProgress();
+                    showMessage('视频上传失败: 网络错误', 'error');
+                });
+                
+                // 发送请求
+                xhr.open('POST', `${API_BASE}/upload/video`);
+                xhr.send(formData);
             };
             input.click();
         }
@@ -816,6 +925,32 @@
                 messageDiv.className = 'message';
                 messageDiv.textContent = '';
             }, 3000);
+        }
+
+        // 显示上传进度
+        function showProgress(percent) {
+            const progressDiv = document.getElementById('uploadProgress');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            progressDiv.classList.add('show');
+            progressBar.style.width = percent + '%';
+            progressText.textContent = `上传中... ${percent}%`;
+        }
+
+        // 更新上传进度
+        function updateProgress(percent) {
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            progressBar.style.width = percent + '%';
+            progressText.textContent = `上传中... ${percent}%`;
+        }
+
+        // 隐藏上传进度
+        function hideProgress() {
+            const progressDiv = document.getElementById('uploadProgress');
+            progressDiv.classList.remove('show');
         }
 
         // 切换预览

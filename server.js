@@ -37,51 +37,63 @@ if (!fs.existsSync(VIDEOS_DIR)) {
 
 // ==================== 文件上传配置 ====================
 
-// 配置 multer 存储
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const fileType = file.mimetype.split('/')[0];
-        if (fileType === 'image') {
-            cb(null, IMAGES_DIR);
-        } else if (fileType === 'video') {
-            cb(null, VIDEOS_DIR);
-        } else {
-            cb(new Error('不支持的文件类型'), null);
+let upload;
+try {
+    // 尝试使用 multer 2.x
+    const multer = require('multer');
+    
+    // 配置 multer 存储
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            const fileType = file.mimetype.split('/')[0];
+            if (fileType === 'image') {
+                cb(null, IMAGES_DIR);
+            } else if (fileType === 'video') {
+                cb(null, VIDEOS_DIR);
+            } else {
+                cb(new Error('不支持的文件类型'), null);
+            }
+        },
+        filename: function (req, file, cb) {
+            // 生成唯一文件名：时间戳 + 随机数 + 原始扩展名
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+            const ext = path.extname(file.originalname);
+            cb(null, file.fieldname + '-' + uniqueSuffix + ext);
         }
-    },
-    filename: function (req, file, cb) {
-        // 生成唯一文件名：时间戳 + 随机数 + 原始扩展名
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const ext = path.extname(file.originalname);
-        cb(null, file.fieldname + '-' + uniqueSuffix + ext);
-    }
-});
+    });
 
-// 文件过滤器
-const fileFilter = (req, file, cb) => {
-    const allowedImageTypes = /jpeg|jpg|png|gif|webp|svg/;
-    const allowedVideoTypes = /mp4|webm|ogg|avi|mov/;
-    
-    const mimetype = allowedImageTypes.test(file.mimetype) || 
-                     allowedVideoTypes.test(file.mimetype);
-    const extname = allowedImageTypes.test(path.extname(file.originalname).toLowerCase()) ||
-                    allowedVideoTypes.test(path.extname(file.originalname).toLowerCase());
-    
-    if (mimetype && extname) {
-        return cb(null, true);
-    } else {
-        cb(new Error('只允许上传图片或视频文件'));
-    }
-};
+    // 文件过滤器
+    const fileFilter = (req, file, cb) => {
+        const allowedImageTypes = /jpeg|jpg|png|gif|webp|svg/;
+        const allowedVideoTypes = /mp4|webm|ogg|avi|mov/;
+        
+        const mimetype = allowedImageTypes.test(file.mimetype) || 
+                         allowedVideoTypes.test(file.mimetype);
+        const extname = allowedImageTypes.test(path.extname(file.originalname).toLowerCase()) ||
+                        allowedVideoTypes.test(path.extname(file.originalname).toLowerCase());
+        
+        if (mimetype && extname) {
+            return cb(null, true);
+        } else {
+            cb(new Error('只允许上传图片或视频文件'));
+        }
+    };
 
-// 创建 multer 实例
-const upload = multer({
-    storage: storage,
-    fileFilter: fileFilter,
-    limits: {
-        fileSize: 50 * 1024 * 1024 // 限制文件大小为 50MB
-    }
-});
+    // 创建 multer 实例
+    upload = multer({
+        storage: storage,
+        fileFilter: fileFilter,
+        limits: {
+            fileSize: 50 * 1024 * 1024 // 限制文件大小为 50MB
+        }
+    });
+    
+    console.log('✅ Multer 加载成功');
+} catch (error) {
+    console.error('❌ Multer 加载失败:', error.message);
+    console.log('⚠️  文件上传功能将不可用');
+    upload = null;
+}
 
 // ==================== 登录API ====================
 
@@ -248,6 +260,39 @@ app.post('/api/posts', (req, res) => {
             });
         }
         
+        const trimmedTitle = title.trim();
+        
+        // 检查是否有重复标题
+        const files = fs.readdirSync(BLOG_DIR);
+        let hasDuplicateTitle = false;
+        let duplicatePostTitle = '';
+        
+        for (const file of files) {
+            if (file.endsWith('.json')) {
+                try {
+                    const filePath = path.join(BLOG_DIR, file);
+                    const fileContent = fs.readFileSync(filePath, 'utf8');
+                    const existingPost = JSON.parse(fileContent);
+                    
+                    // 比较标题（不区分大小写）
+                    if (existingPost.title.toLowerCase() === trimmedTitle.toLowerCase()) {
+                        hasDuplicateTitle = true;
+                        duplicatePostTitle = existingPost.title;
+                        break;
+                    }
+                } catch (err) {
+                    console.error(`读取文件 ${file} 失败:`, err);
+                }
+            }
+        }
+        
+        if (hasDuplicateTitle) {
+            return res.status(409).json({
+                success: false,
+                message: `标题 "${duplicatePostTitle}" 已存在，请使用不同的标题`
+            });
+        }
+        
         const timestamp = Date.now();
         const now = new Date();
         
@@ -264,7 +309,7 @@ app.post('/api/posts', (req, res) => {
         const seconds = String(beijingTime.getSeconds()).padStart(2, '0');
         
         const post = {
-            title: title.trim(),
+            title: trimmedTitle,
             content: content.trim(),
             timestamp: timestamp,
             date: now.toISOString(),
@@ -342,11 +387,44 @@ app.put('/api/posts/:timestamp', (req, res) => {
             });
         }
         
+        const trimmedTitle = title.trim();
+        
+        // 检查是否有重复标题（排除当前文章）
+        const files = fs.readdirSync(BLOG_DIR);
+        let hasDuplicateTitle = false;
+        let duplicatePostTitle = '';
+        
+        for (const file of files) {
+            if (file.endsWith('.json') && file !== `${timestamp}.json`) {
+                try {
+                    const otherFilePath = path.join(BLOG_DIR, file);
+                    const fileContent = fs.readFileSync(otherFilePath, 'utf8');
+                    const existingPost = JSON.parse(fileContent);
+                    
+                    // 比较标题（不区分大小写）
+                    if (existingPost.title.toLowerCase() === trimmedTitle.toLowerCase()) {
+                        hasDuplicateTitle = true;
+                        duplicatePostTitle = existingPost.title;
+                        break;
+                    }
+                } catch (err) {
+                    console.error(`读取文件 ${file} 失败:`, err);
+                }
+            }
+        }
+        
+        if (hasDuplicateTitle) {
+            return res.status(409).json({
+                success: false,
+                message: `标题 "${duplicatePostTitle}" 已存在，请使用不同的标题`
+            });
+        }
+        
         const existingPost = JSON.parse(fs.readFileSync(filePath, 'utf8'));
         
         const updatedPost = {
             ...existingPost,
-            title: title.trim(),
+            title: trimmedTitle,
             content: content.trim(),
             updatedAt: new Date().toISOString()
         };
@@ -380,102 +458,150 @@ app.get('/health', (req, res) => {
 // ==================== 文件上传API ====================
 
 // 上传图片
-app.post('/api/upload/image', upload.single('image'), (req, res) => {
-    try {
-        if (!req.file) {
+app.post('/api/upload/image', (req, res) => {
+    if (!upload) {
+        return res.status(503).json({
+            success: false,
+            message: '文件上传功能未启用'
+        });
+    }
+    
+    upload.single('image')(req, res, (err) => {
+        if (err) {
             return res.status(400).json({
                 success: false,
-                message: '没有上传文件'
+                message: err.message || '图片上传失败'
             });
         }
         
-        // 返回文件的访问URL
-        const fileUrl = `/uploads/images/${req.file.filename}`;
-        
-        res.json({
-            success: true,
-            message: '图片上传成功',
-            data: {
-                filename: req.file.filename,
-                url: fileUrl,
-                size: req.file.size,
-                mimetype: req.file.mimetype
+        try {
+            if (!req.file) {
+                return res.status(400).json({
+                    success: false,
+                    message: '没有上传文件'
+                });
             }
-        });
-    } catch (error) {
-        console.error('图片上传错误:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message || '图片上传失败'
-        });
-    }
+            
+            // 返回文件的访问URL
+            const fileUrl = `/uploads/images/${req.file.filename}`;
+            
+            res.json({
+                success: true,
+                message: '图片上传成功',
+                data: {
+                    filename: req.file.filename,
+                    url: fileUrl,
+                    size: req.file.size,
+                    mimetype: req.file.mimetype
+                }
+            });
+        } catch (error) {
+            console.error('图片上传错误:', error);
+            res.status(500).json({
+                success: false,
+                message: error.message || '图片上传失败'
+            });
+        }
+    });
 });
 
 // 上传视频
-app.post('/api/upload/video', upload.single('video'), (req, res) => {
-    try {
-        if (!req.file) {
+app.post('/api/upload/video', (req, res) => {
+    if (!upload) {
+        return res.status(503).json({
+            success: false,
+            message: '文件上传功能未启用'
+        });
+    }
+    
+    upload.single('video')(req, res, (err) => {
+        if (err) {
             return res.status(400).json({
                 success: false,
-                message: '没有上传文件'
+                message: err.message || '视频上传失败'
             });
         }
         
-        // 返回文件的访问URL
-        const fileUrl = `/uploads/videos/${req.file.filename}`;
-        
-        res.json({
-            success: true,
-            message: '视频上传成功',
-            data: {
-                filename: req.file.filename,
-                url: fileUrl,
-                size: req.file.size,
-                mimetype: req.file.mimetype
+        try {
+            if (!req.file) {
+                return res.status(400).json({
+                    success: false,
+                    message: '没有上传文件'
+                });
             }
-        });
-    } catch (error) {
-        console.error('视频上传错误:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message || '视频上传失败'
-        });
-    }
+            
+            // 返回文件的访问URL
+            const fileUrl = `/uploads/videos/${req.file.filename}`;
+            
+            res.json({
+                success: true,
+                message: '视频上传成功',
+                data: {
+                    filename: req.file.filename,
+                    url: fileUrl,
+                    size: req.file.size,
+                    mimetype: req.file.mimetype
+                }
+            });
+        } catch (error) {
+            console.error('视频上传错误:', error);
+            res.status(500).json({
+                success: false,
+                message: error.message || '视频上传失败'
+            });
+        }
+    });
 });
 
 // 通用文件上传（自动识别类型）
-app.post('/api/upload', upload.single('file'), (req, res) => {
-    try {
-        if (!req.file) {
+app.post('/api/upload', (req, res) => {
+    if (!upload) {
+        return res.status(503).json({
+            success: false,
+            message: '文件上传功能未启用'
+        });
+    }
+    
+    upload.single('file')(req, res, (err) => {
+        if (err) {
             return res.status(400).json({
                 success: false,
-                message: '没有上传文件'
+                message: err.message || '文件上传失败'
             });
         }
         
-        const fileType = req.file.mimetype.split('/')[0];
-        const fileUrl = fileType === 'image' 
-            ? `/uploads/images/${req.file.filename}`
-            : `/uploads/videos/${req.file.filename}`;
-        
-        res.json({
-            success: true,
-            message: '文件上传成功',
-            data: {
-                filename: req.file.filename,
-                url: fileUrl,
-                type: fileType,
-                size: req.file.size,
-                mimetype: req.file.mimetype
+        try {
+            if (!req.file) {
+                return res.status(400).json({
+                    success: false,
+                    message: '没有上传文件'
+                });
             }
-        });
-    } catch (error) {
-        console.error('文件上传错误:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message || '文件上传失败'
-        });
-    }
+            
+            const fileType = req.file.mimetype.split('/')[0];
+            const fileUrl = fileType === 'image' 
+                ? `/uploads/images/${req.file.filename}`
+                : `/uploads/videos/${req.file.filename}`;
+            
+            res.json({
+                success: true,
+                message: '文件上传成功',
+                data: {
+                    filename: req.file.filename,
+                    url: fileUrl,
+                    type: fileType,
+                    size: req.file.size,
+                    mimetype: req.file.mimetype
+                }
+            });
+        } catch (error) {
+            console.error('文件上传错误:', error);
+            res.status(500).json({
+                success: false,
+                message: error.message || '文件上传失败'
+            });
+        }
+    });
 });
 
 // ==================== 404 处理 ====================
@@ -485,6 +611,12 @@ app.use(express.static(path.join(__dirname)));
 
 // 提供上传文件的访问
 app.use('/uploads', express.static(UPLOADS_DIR));
+
+// 调试：记录上传文件访问
+app.use('/uploads', (req, res, next) => {
+    console.log(`访问上传文件: ${req.path}`);
+    next();
+});
 
 // 404 处理
 app.use((req, res) => {
