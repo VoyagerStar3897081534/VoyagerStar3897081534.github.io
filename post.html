@@ -452,6 +452,8 @@
                         <div class="toolbar-separator"></div>
                         <button type="button" class="toolbar-btn" onclick="insertImage()" title="图片">🖼️ 图片</button>
                         <button type="button" class="toolbar-btn" onclick="insertVideo()" title="视频">🎥 视频</button>
+                        <button type="button" class="toolbar-btn" onclick="uploadLocalImage()" title="上传图片">📤 上传图片</button>
+                        <button type="button" class="toolbar-btn" onclick="uploadLocalVideo()" title="上传视频">📤 上传视频</button>
                         <div class="toolbar-separator"></div>
                         <button type="button" class="toolbar-btn" onclick="togglePreview()" id="previewBtn" title="预览">👁️ 预览</button>
                     </div>
@@ -699,6 +701,50 @@
             }
         }
 
+        // 上传本地图片
+        function uploadLocalImage() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = async function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                // 检查文件大小（最大 10MB）
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('图片大小不能超过 10MB');
+                    return;
+                }
+                
+                const formData = new FormData();
+                formData.append('image', file);
+                
+                try {
+                    const response = await fetch(`${API_BASE}/upload/image`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        const imageUrl = window.location.origin + result.data.url;
+                        const alt = prompt('请输入图片描述:', file.name);
+                        if (alt !== null) {
+                            insertMarkdown(`![${alt}](${imageUrl})`, '');
+                        }
+                        showMessage('图片上传成功！', 'success');
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error) {
+                    console.error('上传失败:', error);
+                    showMessage('图片上传失败: ' + error.message, 'error');
+                }
+            };
+            input.click();
+        }
+
         // 插入视频
         function insertVideo() {
             const url = prompt('请输入视频URL地址（支持 MP4、WebM 等格式）:');
@@ -711,6 +757,65 @@
                 textarea.value = text.substring(0, start) + videoHtml + text.substring(start);
                 textarea.focus();
             }
+        }
+
+        // 上传本地视频
+        function uploadLocalVideo() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'video/*';
+            input.onchange = async function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                // 检查文件大小（最大 50MB）
+                if (file.size > 50 * 1024 * 1024) {
+                    alert('视频大小不能超过 50MB');
+                    return;
+                }
+                
+                const formData = new FormData();
+                formData.append('video', file);
+                
+                try {
+                    const response = await fetch(`${API_BASE}/upload/video`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        const videoUrl = window.location.origin + result.data.url;
+                        const videoHtml = `\n<video controls width="100%">\n  <source src="${videoUrl}" type="${result.data.mimetype}">\n  您的浏览器不支持视频播放。\n</video>\n`;
+                        const textarea = document.getElementById('content');
+                        const start = textarea.selectionStart;
+                        const text = textarea.value;
+                        
+                        textarea.value = text.substring(0, start) + videoHtml + text.substring(start);
+                        textarea.focus();
+                        showMessage('视频上传成功！', 'success');
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error) {
+                    console.error('上传失败:', error);
+                    showMessage('视频上传失败: ' + error.message, 'error');
+                }
+            };
+            input.click();
+        }
+
+        // 显示消息
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = 'message ' + type;
+            messageDiv.textContent = message;
+            
+            setTimeout(() => {
+                messageDiv.className = 'message';
+                messageDiv.textContent = '';
+            }, 3000);
         }
 
         // 切换预览

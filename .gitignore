@@ -30,3 +30,9 @@ app.pid
 
 # Railway
 .railway
+
+# Uploads (用户上传的文件)
+uploads/images/*
+uploads/videos/*
+!uploads/images/.gitkeep
+!uploads/videos/.gitkeep
