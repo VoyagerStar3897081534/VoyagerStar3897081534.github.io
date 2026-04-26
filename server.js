@@ -261,6 +261,36 @@ app.put('/api/posts/:timestamp', (req, res) => {
     }
 });
 
+// ==================== 健康检查 ====================
+
+app.get('/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        message: 'Server is running',
+        timestamp: new Date().toISOString()
+    });
+});
+
+// ==================== 404 处理 ====================
+
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        message: 'API endpoint not found',
+        path: req.path
+    });
+});
+
+// ==================== 错误处理 ====================
+
+app.use((err, req, res) => {
+    console.error('Server error:', err);
+    res.status(500).json({
+        success: false,
+        message: 'Internal server error'
+    });
+});
+
 // ==================== 启动服务器 ====================
 
 app.listen(PORT, () => {
