@@ -1,0 +1,12 @@
+这是一个占位文件。
+
+要添加真实的视频，请：
+1. 将你的视频文件（.mp4, .webm等）复制到此目录
+2. 在博客JSON文件中使用 Markdown 语法引用：![描述](videos/文件名.mp4)
+
+示例文件名：
+- demo.mp4
+- tutorial.webm
+- presentation.mp4
+
+注意：建议视频文件大小不超过10MB，以确保加载速度。

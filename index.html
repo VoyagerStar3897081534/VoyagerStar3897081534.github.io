@@ -337,9 +337,6 @@
     </div>
 
     <script src="background.js"></script>
-    <script src="auth.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
     <script>
         // 多语言支持
         let currentLang = localStorage.getItem('language') || 'zh-CN';
@@ -483,20 +480,60 @@
             }, 500);
         }
 
+
+
         // 加载最近三篇博客
         async function loadRecentPosts() {
             const container = document.getElementById('recent-posts-container');
             
             try {
-                const apiUrl = `${API_BASE}/posts?lang=${currentLang}`;
-                const response = await fetch(apiUrl);
-                const result = await response.json();
+                // 从本地 data/blog 目录读取所有 JSON 文件
+                const response = await fetch('data/blog/');
                 
-                if (!result.success) {
-                    throw new Error(result.message || '加载失败');
+                // 由于无法直接列出目录，我们需要尝试读取已知的文件
+                // 这里使用一个简化的方法：尝试读取几个可能的时间戳文件
+                // 在实际应用中，你可能需要维护一个索引文件
+                
+                const posts = [];
+                
+                // 尝试读取常见的博客文件（这里需要根据实际情况调整）
+                // 更好的方法是创建一个索引文件 data/blog/index.json
+                try {
+                    const indexResponse = await fetch('data/blog/index.json');
+                    if (indexResponse.ok) {
+                        const indexData = await indexResponse.json();
+                        for (const filename of indexData.files || []) {
+                            try {
+                                const postResponse = await fetch(`data/blog/${filename}`);
+                                if (postResponse.ok) {
+                                    const post = await postResponse.json();
+                                    posts.push(post);
+                                }
+                            } catch (e) {
+                                console.warn(`无法读取 ${filename}:`, e);
+                            }
+                        }
+                    } else {
+                        // 如果没有索引文件，尝试读取示例文件
+                        const fallbackFiles = ['1714118400000.json'];
+                        for (const filename of fallbackFiles) {
+                            try {
+                                const postResponse = await fetch(`data/blog/${filename}`);
+                                if (postResponse.ok) {
+                                    const post = await postResponse.json();
+                                    posts.push(post);
+                                }
+                            } catch (e) {
+                                console.warn(`无法读取 ${filename}:`, e);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('读取博客索引失败:', error);
                 }
                 
-                const posts = result.data;
+                // 按时间戳排序（最新的在前）
+                posts.sort((a, b) => b.timestamp - a.timestamp);
                 
                 if (posts.length === 0) {
                     container.innerHTML = `
@@ -512,18 +549,122 @@
                 
                 // 渲染文章列表
                 container.innerHTML = recentPosts.map(post => {
-                    // 提取纯文本预览（去除 Markdown 标记）
-                    const plainText = post.content.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')  // 链接
-                        .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')  // 图片
+                    // 提取纯文本预览（去除所有 Markdown 标记）
+                    const plainText = post.content.replace(/!\[([^\]]*)\]\([^)]+\)/g, '')  // 图片/视频（直接删除）
+                        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')  // 链接（保留文字）
                         .replace(/^#+\s+/gm, '')  // 标题
                         .replace(/\*\*(.+?)\*\*/g, '$1')  // 粗体
                         .replace(/\*(.+?)\*/g, '$1')  // 斜体
                         .replace(/`(.+?)`/g, '$1')  // 代码
                         .replace(/^>\s+/gm, '')  // 引用
                         .replace(/^-\s+/gm, '')  // 列表
-                        .replace(/^\d+\.\s+/gm, '');  // 有序列表
+                        .replace(/^\d+\.\s+/gm, '')  // 有序列表
+                        .replace(/```[\s\S]*?```/g, '')  // 代码块
+                        .replace(/\n+/g, ' ')  // 换行符替换为空格
+                        .trim();
                     
-                    const preview = plainText.substring(0, 200) + (plainText.length > 200 ? '...' : '');
+                    // 只显示前20个字
+                    const preview = plainText.substring(0, 20) + (plainText.length > 20 ? '...' : '');
+                    
+                    return `
+                        <div class="recent-post-card">
+                            <h3 class="recent-post-title">${escapeHtml(post.title)}</h3>
+                            <div class="recent-post-date">发布于 ${post.formattedDate}</div>
+                            <div class="recent-post-content">${escapeHtml(preview)}</div>
+                            <button class="read-more-button" onclick="window.location.href='article.html?timestamp=${post.timestamp}'">
+                                阅读全文
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('加载最近文章失败:', error);
+                container.innerHTML = `
+                    <div class="no-posts-message">
+                        <p style="color: #ff6b6b;">❌ 加载失败：${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 转义HTML特殊字符
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 加载最近三篇博客
+        async function loadRecentPosts() {
+            const container = document.getElementById('recent-posts-container');
+            
+            try {
+                // 从本地 data/blog 目录读取所有 JSON 文件
+                const posts = [];
+                
+                // 尝试读取博客索引文件
+                const indexResponse = await fetch('data/blog/index.json');
+                if (!indexResponse.ok) {
+                    throw new Error('无法加载博客索引文件');
+                }
+                
+                const indexData = await indexResponse.json();
+                
+                if (!indexData.files || !Array.isArray(indexData.files)) {
+                    throw new Error('博客索引文件格式错误');
+                }
+                
+                for (const filename of indexData.files) {
+                    try {
+                        const postResponse = await fetch(`data/blog/${filename}`);
+                        if (!postResponse.ok) {
+                            console.warn(`无法读取 ${filename}: HTTP ${postResponse.status}`);
+                            continue;
+                        }
+                        const post = await postResponse.json();
+                        posts.push(post);
+                    } catch (e) {
+                        console.warn(`解析 ${filename} 失败:`, e.message);
+                    }
+                }
+                
+                if (posts.length === 0) {
+                    throw new Error('没有找到任何博客文章');
+                }
+                
+                // 按时间戳排序（最新的在前）
+                posts.sort((a, b) => b.timestamp - a.timestamp);
+                
+                if (posts.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-posts-message">
+                            <p>暂无文章</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // 取最近三篇
+                const recentPosts = posts.slice(0, 3);
+                
+                // 渲染文章列表
+                container.innerHTML = recentPosts.map(post => {
+                    // 提取纯文本预览（去除所有 Markdown 标记）
+                    const plainText = post.content.replace(/!\[([^\]]*)\]\([^)]+\)/g, '')  // 图片/视频（直接删除）
+                        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')  // 链接（保留文字）
+                        .replace(/^#+\s+/gm, '')  // 标题
+                        .replace(/\*\*(.+?)\*\*/g, '$1')  // 粗体
+                        .replace(/\*(.+?)\*/g, '$1')  // 斜体
+                        .replace(/`(.+?)`/g, '$1')  // 代码
+                        .replace(/^>\s+/gm, '')  // 引用
+                        .replace(/^-\s+/gm, '')  // 列表
+                        .replace(/^\d+\.\s+/gm, '')  // 有序列表
+                        .replace(/```[\s\S]*?```/g, '')  // 代码块
+                        .replace(/\n+/g, ' ')  // 换行符替换为空格
+                        .trim();
+                    
+                    // 只显示前20个字
+                    const preview = plainText.substring(0, 20) + (plainText.length > 20 ? '...' : '');
                     
                     return `
                         <div class="recent-post-card">

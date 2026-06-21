@@ -1,0 +1,10 @@
+这是一个占位文件。
+
+要添加真实的图片，请：
+1. 将你的图片文件（.jpg, .png, .gif等）复制到此目录
+2. 在博客JSON文件中使用 Markdown 语法引用：![描述](images/文件名.jpg)
+
+示例文件名：
+- sample.jpg
+- photo.png
+- screenshot.gif

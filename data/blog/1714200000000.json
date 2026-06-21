@@ -1,0 +1,10 @@
+{
+  "timestamp": 1714200000000,
+  "title": "博客媒体功能使用指南",
+  "content": "# 欢迎使用媒体功能\n\n这是一篇介绍如何在博客中使用图片和视频的教程文章。\n\n## 如何添加图片\n\n在博客JSON文件的content字段中使用Markdown语法：\n\n```markdown\n![图片描述](images/你的图片文件名.jpg)\n```\n\n例如：\n```markdown\n![风景照](images/landscape.jpg)\n```\n\n## 如何添加视频\n\n使用以下语法添加视频：\n\n```markdown\n![视频描述](videos/你的视频文件名.mp4)\n```\n\n例如：\n```markdown\n![教程视频](videos/tutorial.mp4)\n```\n\n## 支持的格式\n\n### 图片格式\n- JPG/JPEG\n- PNG\n- GIF\n- WebP\n- SVG\n\n### 视频格式\n- MP4（推荐）\n- WebM\n- Ogg\n\n## 使用步骤\n\n1. 将图片文件放入 `data/blog/resources/images/` 目录\n2. 将视频文件放入 `data/blog/resources/videos/` 目录\n3. 在博客JSON中使用上述Markdown语法引用\n4. 系统会自动处理路径转换和渲染\n\n## 注意事项\n\n- 建议使用英文文件名，避免特殊字符\n- 图片建议压缩到500KB以下，以提高加载速度\n- 视频建议压缩到10MB以下\n- 查看 data/blog/resources/README.md 获取更多详细信息\n\n## 示例代码\n\n完整的blog JSON文件示例：\n\n```json\n{\n  \"timestamp\": 1714200000000,\n  \"title\": \"我的第一篇带媒体的博客\",\n  \"content\": \"# 标题\\n\\n![示例图片](images/example.jpg)\\n\\n![示例视频](videos/demo.mp4)\",\n  \"formattedDate\": \"2026-06-21 15:00:00\",\n  \"media\": {\n    \"images\": [\"example.jpg\"],\n    \"videos\": [\"demo.mp4\"]\n  }\n}\n```\n\n现在你可以开始在你的博客中添加精彩的图片和视频了！",
+  "formattedDate": "2026-06-21 15:00:00",
+  "media": {
+    "images": [],
+    "videos": []
+  }
+}
