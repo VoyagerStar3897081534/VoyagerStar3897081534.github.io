@@ -419,15 +419,20 @@
         function updatePreview() {
             let processedContent = editor.value;
             
+            // 获取网站基础路径(支持GitHub Pages子目录部署)
+            const basePath = window.location.pathname.includes('/VoyagerStar3897081534.github.io/') 
+                ? '/VoyagerStar3897081534.github.io' 
+                : '';
+            
             // 处理图片和视频路径
             processedContent = processedContent.replace(
                 /!\[([^\]]*)]\(images\/([^)]+)\)/g,
-                `![$1](data/blog/resources/images/$2)`
+                `![$1](${basePath}/data/blog/resources/images/$2)`
             );
             
             processedContent = processedContent.replace(
                 /!\[([^\]]*)]\(videos\/([^)]+)\)/g,
-                `<video controls preload="metadata" style="max-width: 100%; border-radius: 8px; margin: 10px 0;"><source src="data/blog/resources/videos/$2" type="video/mp4">$1</video>`
+                `<video controls preload="metadata" style="max-width: 100%; border-radius: 8px; margin: 10px 0;"><source src="${basePath}/data/blog/resources/videos/$2" type="video/mp4">$1</video>`
             );
 
             preview.innerHTML = DOMPurify.sanitize(marked.parse(processedContent));

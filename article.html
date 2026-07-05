@@ -417,16 +417,21 @@
             // 处理 Markdown 内容中的媒体资源路径
             let processedContent = post.content;
             
-            // 替换图片路径：images/xxx -> data/blog/resources/images/xxx
+            // 获取网站基础路径(支持GitHub Pages子目录部署)
+            const basePath = window.location.pathname.includes('/VoyagerStar3897081534.github.io/') 
+                ? '/VoyagerStar3897081534.github.io' 
+                : '';
+            
+            // 替换图片路径：images/xxx -> /data/blog/resources/images/xxx (带basePath)
             processedContent = processedContent.replace(
                 /!\[([^\]]*)\]\(images\/([^)]+)\)/g,
-                `![$1](data/blog/resources/images/$2)`
+                `![$1](${basePath}/data/blog/resources/images/$2)`
             );
             
-            // 替换视频路径：videos/xxx -> data/blog/resources/videos/xxx
+            // 替换视频路径：videos/xxx -> /data/blog/resources/videos/xxx (带basePath)
             processedContent = processedContent.replace(
                 /!\[([^\]]*)\]\(videos\/([^)]+)\)/g,
-                `![$1](data/blog/resources/videos/$2)`
+                `![$1](${basePath}/data/blog/resources/videos/$2)`
             );
             
             // 使用 marked 解析 Markdown，并用 DOMPurify 清理 HTML
@@ -434,8 +439,8 @@
             
             // 将视频标记转换为 video 标签
             renderedContent = renderedContent.replace(
-                /<img src="data\/blog\/resources\/videos\/([^"]+)" alt="([^"]*)"\s*\/?>/g,
-                '<video controls preload="metadata" style="max-width: 100%; border-radius: 8px; margin: 15px 0; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);"><source src="data/blog/resources/videos/$1" type="video/mp4">$2</video>'
+                /<img src="([^"]*?)\/data\/blog\/resources\/videos\/([^"]+)" alt="([^"]*)"\s*\/>?/g,
+                `<video controls preload="metadata" style="max-width: 100%; border-radius: 8px; margin: 15px 0; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);"><source src="$1/data/blog/resources/videos/$2" type="video/mp4">$3</video>`
             );
             
             container.innerHTML = `
